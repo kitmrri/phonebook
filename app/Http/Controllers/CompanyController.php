@@ -77,7 +77,7 @@ class CompanyController extends Controller
         $employees = $recipient->create($request);
 
         $queueAdder = new QueueAdder(new RedisQueue());
-        $queueAdder->addToQueue($employees, 'Test message', $company->id);
+        $queueAdder->addToQueue($employees, $request->message, $company->id);
 
         return response()->json(['message' => 'SMS added to queue for processing']);
     }
