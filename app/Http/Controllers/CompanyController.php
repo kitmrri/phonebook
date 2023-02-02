@@ -7,6 +7,7 @@ use App\Models\Company;
 use App\Models\Employee;
 use App\Implementations\QueueAdder;
 use App\Utilities\RedisQueue;
+use App\Factories\RecipientFactory;
 
 class CompanyController extends Controller
 {
@@ -71,25 +72,13 @@ class CompanyController extends Controller
     // SMS QUEUE AND SENDING
     public function sendSmsQueue(Request $request)
     {
-        $company = Company::findOrFail($request->company_id);
-        $employees = $company->employees();
-
-        if ($request->recipient_type === 'all') {
-            $employees = $employees->get();
-        } else if ($request->recipient_type === 'employee') {
-            $employees = $employees->where('id', $request->employee_id)->get();
-        } else if ($request->recipient_type === 'selected') {
-            $employees = $employees->whereIn('id', $request->employee_ids)->get();
-        } else if ($request->recipient_type === 'department') {
-            $employees = $employees->whereHas('department', function ($query) use ($request) {
-                $query->where('id', $request->department_id);
-            })->get();
-        }
+        $recipient = RecipientFactory::create($request);
+        $employees = $recipient->create($request);
 
         $queueAdder = new QueueAdder(new RedisQueue());
         $queueAdder->addToQueue($employees, $request->message);
+
         return response()->json(['message' => 'SMS added to queue for processing']);
     }
-
     
 }

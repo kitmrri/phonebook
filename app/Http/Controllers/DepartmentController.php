@@ -7,9 +7,9 @@ use App\Models\Department;
 
 class DepartmentController extends Controller
 {
-    public function index()
+    public function index($companyId)
     {
-        $departments = Department::all();
+        $departments = Department::where('company_id', $companyId)->get();
         return view('departments.index', compact('departments'));
     }
 

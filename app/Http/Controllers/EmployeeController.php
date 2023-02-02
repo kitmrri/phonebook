@@ -4,27 +4,26 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Employee;
-use App\Models\Department;
 
 class EmployeeController extends Controller
 {
-    public function index()
+
+    public function index($company_id)
     {
-        $employees = Employee::all();
+        $employees = Employee::where('company_id', $company_id)->get();
         return view('employees.index', compact('employees'));
     }
 
     public function create()
     {
-        $departments = Department::all();
-        return view('employees.create', compact('departments'));
+        return view('employees.create', compact('employees'));
     }
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
             'name' => 'required',
-            'number' => 'required|max:11',
+            'number' => 'required',
             'department_id' => 'required|exists:departments,id'
         ]);
 
@@ -53,7 +52,7 @@ class EmployeeController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required',
-            'number' => 'required|max:11',
+            'number' => 'required',
             'department_id' => 'required|exists:departments,id'
         ]);
 
