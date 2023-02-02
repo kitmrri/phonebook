@@ -27,7 +27,7 @@ class DepartmentController extends Controller
 
         $Department = Department::create([
             'name' => $validatedData['name'],
-            'company_id' => $validatedData['name'],
+            'company_id' => $validatedData['company_id'],
         ]);
 
         return redirect()->route('departments.index')->with('success', 'Department created successfully!');
@@ -55,7 +55,7 @@ class DepartmentController extends Controller
         $Department = Department::findOrFail($id);
         $Department->update([
             'name' => $validatedData['name'],
-            'company_id' => $validatedData['name'],
+            'company_id' => $validatedData['company_id'],
         ]);
 
         return redirect()->route('departments.index')->with('success', 'Department updated successfully!');
