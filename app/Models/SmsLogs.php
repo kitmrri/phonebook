@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SmsLog extends Model
+class SmsLogs extends Model
 {
     protected $fillable = [
-        'to', 'message', 'sent_at',
+        'to', 'message', 'company_id', 'created_at',
     ];
 }

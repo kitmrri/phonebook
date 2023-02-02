@@ -4,7 +4,7 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateSmsLogTable extends Migration
+class CreateSmsLogsTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,12 +13,13 @@ class CreateSmsLogTable extends Migration
      */
     public function up()
     {
-        Schema::create('sms_log', function (Blueprint $table) {
+        Schema::create('sms_logs', function (Blueprint $table) {
             $table->id();
-            $table->integer('company_id');
+            $table->unsignedBigInteger('company_id');
+            $table->foreign('company_id')->references('id')->on('companies');
             $table->text('message');
             $table->text('to');
-            $table->timestamp('sent_at');
+            $table->timestamps();
         });
     }
 
@@ -29,6 +30,6 @@ class CreateSmsLogTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('sms_log');
+        Schema::dropIfExists('sms_logs');
     }
 }

@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 class RecipientFactory
 {
-    public static function create(Request $request)
+    public function create(Request $request)
     {
         try {
             switch ($request->recipient_type) {

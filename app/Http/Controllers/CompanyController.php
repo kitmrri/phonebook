@@ -70,13 +70,14 @@ class CompanyController extends Controller
     }
 
     // SMS QUEUE AND SENDING
-    public function sendSmsQueue(Request $request)
+    public function sendSmsQueue(Request $request, $id)
     {
+        $company = Company::findOrFail($id)->get();
         $recipient = RecipientFactory::create($request);
         $employees = $recipient->create($request);
 
         $queueAdder = new QueueAdder(new RedisQueue());
-        $queueAdder->addToQueue($employees, $request->message);
+        $queueAdder->addToQueue($employees, 'Test message', $company->id);
 
         return response()->json(['message' => 'SMS added to queue for processing']);
     }

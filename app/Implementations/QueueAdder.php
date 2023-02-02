@@ -3,7 +3,7 @@
 namespace App\Implementations;
 
 use App\Interfaces\Queue;
-use App\Models\SmsLog;
+use App\Models\SmsLogs;
 use Carbon\Carbon;
 
 class QueueAdder
@@ -15,25 +15,24 @@ class QueueAdder
     $this->queue = $queue;
   }
 
-  public function addToQueue($employees, $message)
+  public function addToQueue($employees, $message, $company_id)
   {
     foreach ($employees as $employee) {
       $this->queue->push([
         'to' => $employee->phone_number,
-        'message' => $message
+        'message' => $message,
+        'company_id' => $company_id
       ]);
 
-      $this->sendAndLog($employee->phone_number, $message);
+      $this->sendAndLog();
     }
   }
 
   public function sendAndLog()
   {
     $queue = $this->queue->pull();
-    foreach ($queue as $item) {
-      $this->mockSend($item['to'], $item['message']);
-      $this->insertIntoSmsLog($item['to'], $item['message']);
-    }
+    $this->mockSend($queue['to'], $queue['message']);
+    $this->insertIntoSmsLog($queue['to'], $queue['message'], $queue['company_id']);
   }
 
   private function mockSend($to, $message)
@@ -42,12 +41,13 @@ class QueueAdder
     sleep(1);
   }
 
-  private function insertIntoSmsLog($to, $message)
+  private function insertIntoSmsLog($to, $message, $company_id)
   {
-    $smsLog = new SmsLog;
+    $smsLog = new SmsLogs;
     $smsLog->to = $to;
     $smsLog->message = $message;
-    $smsLog->sent_at = Carbon::now();
+    $smsLog->company_id = $company_id;
+    $smsLog->created_at = Carbon::now();
     $smsLog->save();
   }
 

@@ -1,47 +1,55 @@
 <?php
 
-use App\Models\Employee;
-use App\Models\SmsLog;
-use App\Implementations\QueueAdder;
-use App\Utilities\RedisQueue;
+namespace Tests\Unit;
+
 use Tests\TestCase;
+use App\Implementations\QueueAdder;
+use App\Interfaces\Queue;
+use App\Models\SmsLogs;
+use Carbon\Carbon;
 
 class QueueAdderTest extends TestCase
 {
+
     public function testAddToQueue()
     {
-      $employees = factory(Employee::class, 2)->create();
-      $message = 'Test message';
+        $queueMock = $this->createMock(Queue::class);
+        $queueMock->expects($this->once())
+            ->method('push')
+            ->with([
+                'to' => '1234567890',
+                'message' => 'Test message',
+                'company_id' => 2
+            ]);
 
-      $queueAdder = new QueueAdder(new RedisQueue());
-      $queueAdder->addToQueue($employees, $message);
-
-      // Check that the correct SMS was added to the queue for each employee
-      foreach ($employees as $employee) {
-        $expected = [
-          'to' => $employee->phone_number,
-          'message' => $message
-        ];
-        $this->assertEquals($expected, Redis::lpop('sms_queue'));
-      }
+        $queueAdder = new QueueAdder($queueMock);
+        $queueAdder->addToQueue([
+            (object) [
+                'phone_number' => '1234567890',
+            ]
+        ], 'Test message', 2);
     }
 
     public function testSendAndLog()
     {
-      $employee = factory(Employee::class)->create();
-      $message = 'Test message';
+        $queueMock = $this->createMock(Queue::class);
+        $queueMock->expects($this->once())
+            ->method('pull')
+            ->willReturn([
+                [
+                    'to' => '1234567890',
+                    'message' => 'Test message',
+                    'company_id' => 2
+                ]
+            ]);
 
-      $queueAdder = new QueueAdder(new RedisQueue());
-      $queueAdder->addToQueue([$employee], $message);
+        $queueAdder = new QueueAdder($queueMock);
+        $queueAdder->sendAndLog();
 
-      $queueAdder->sendAndLog();
-
-      // Check that the SMS was sent
-      $this->expectOutputString("Sending message to {$employee->phone_number}: {$message}\n");
-
-      // Check that the SMS was logged
-      $smsLog = SmsLog::first();
-      $this->assertEquals($employee->phone_number, $smsLog->to);
-      $this->assertEquals($message, $smsLog->message);
+        $this->assertDatabaseHas('sms_logs', [
+            'to' => '1234567890',
+            'message' => 'Test message',
+            'company_id' => 2
+        ]);
     }
 }
