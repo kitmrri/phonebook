@@ -22,10 +22,12 @@ class DepartmentController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required',
+            'company_id' => 'required'
         ]);
 
         $Department = Department::create([
             'name' => $validatedData['name'],
+            'company_id' => $validatedData['name'],
         ]);
 
         return redirect()->route('departments.index')->with('success', 'Department created successfully!');
@@ -47,11 +49,13 @@ class DepartmentController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required',
+            'company_id' => 'required'
         ]);
 
         $Department = Department::findOrFail($id);
         $Department->update([
             'name' => $validatedData['name'],
+            'company_id' => $validatedData['name'],
         ]);
 
         return redirect()->route('departments.index')->with('success', 'Department updated successfully!');

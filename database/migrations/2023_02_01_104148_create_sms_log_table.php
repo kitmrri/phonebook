@@ -17,7 +17,7 @@ class CreateSmsLogTable extends Migration
             $table->id();
             $table->integer('company_id');
             $table->text('message');
-            $table->text('recepient');
+            $table->text('to');
             $table->timestamp('sent_at');
         });
     }

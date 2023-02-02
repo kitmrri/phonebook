@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Employee;
+use App\Models\Department;
 
 class EmployeeController extends Controller
 {
@@ -15,21 +16,22 @@ class EmployeeController extends Controller
 
     public function create()
     {
-        return view('employees.create');
+        $departments = Department::all();
+        return view('employees.create', compact('departments'));
     }
 
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'first_name' => 'required',
-            'last_name' => 'required',
-            'number' => 'required|max:11'
+            'name' => 'required',
+            'number' => 'required|max:11',
+            'department_id' => 'required|exists:departments,id'
         ]);
 
         $Employee = Employee::create([
-            'first_name' => $validatedData['first_name'],
-            'last_name' => $validatedData['last_name'],
-            'number' => $validatedData['number']
+            'name' => $validatedData['name'],
+            'number' => $validatedData['number'],
+            'department_id' => $validatedData['department_id']
         ]);
 
         return redirect()->route('employees.index')->with('success', 'Employee created successfully!');
@@ -51,11 +53,15 @@ class EmployeeController extends Controller
     {
         $validatedData = $request->validate([
             'name' => 'required',
+            'number' => 'required|max:11',
+            'department_id' => 'required|exists:departments,id'
         ]);
 
         $Employee = Employee::findOrFail($id);
         $Employee->update([
             'name' => $validatedData['name'],
+            'number' => $validatedData['number'],
+            'department_id' => $validatedData['department_id']
         ]);
 
         return redirect()->route('employees.index')->with('success', 'Employee updated successfully!');
